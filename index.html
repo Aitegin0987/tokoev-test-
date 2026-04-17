@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ky">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>тест </title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background: linear-gradient(135deg, #1d2671, #c33764);
+    color:white;
+    padding:15px;
+}
+
+.container{
+    width:100%;
+    max-width:600px;
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(15px);
+    border-radius:20px;
+    padding:25px;
+    box-shadow:0 0 30px rgba(0,0,0,0.5);
+    animation: fadeIn 0.8s ease;
+}
+
+h1{
+    text-align:center;
+    margin-bottom:10px;
+    font-size:26px;
+}
+
+.timer{
+    text-align:right;
+    font-weight:bold;
+    margin-bottom:10px;
+    font-size:16px;
+}
+
+.progress{
+    height:8px;
+    background:#ffffff33;
+    border-radius:10px;
+    overflow:hidden;
+    margin-bottom:15px;
+}
+
+.progress-bar{
+    height:100%;
+    width:0%;
+    background:#00ffcc;
+    transition:0.3s;
+}
+
+.question{
+    font-size:20px;
+    margin-bottom:15px;
+}
+
+.answers div{
+    background:rgba(255,255,255,0.15);
+    padding:12px;
+    margin:8px 0;
+    border-radius:10px;
+    cursor:pointer;
+    transition:0.3s;
+    font-size:16px;
+}
+
+.answers div:hover{
+    background:#00ffcc;
+    color:black;
+}
+
+.selected{
+    background:#00ffcc !important;
+    color:black;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    margin-top:15px;
+    border:none;
+    border-radius:10px;
+    background:#00ffcc;
+    color:black;
+    font-size:16px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+button:hover{
+    background:#00ccaa;
+}
+
+.result{
+    text-align:center;
+    font-size:22px;
+}
+
+@keyframes fadeIn{
+    from{opacity:0; transform:scale(0.9);}
+    to{opacity:1; transform:scale(1);}
+}
+
+/* 📱 МОБИЛКА */
+@media (max-width: 480px){
+    .container{
+        padding:18px;
+        border-radius:15px;
+    }
+
+    h1{
+        font-size:20px;
+    }
+
+    .question{
+        font-size:17px;
+    }
+
+    .answers div{
+        font-size:15px;
+        padding:10px;
+    }
+
+    button{
+        font-size:15px;
+        padding:12px;
+    }
+}
+
+/* 📲 ПЛАНШЕТ */
+@media (min-width:481px) and (max-width:768px){
+    .container{
+        max-width:500px;
+    }
+
+    h1{
+        font-size:24px;
+    }
+}
+</style>
+
+</head>
+<body>
+
+<div class="container">
+    <h1>🇰🇬 Маданият тест</h1>
+    <div class="timer">⏱ <span id="time">60</span> сек</div>
+
+    <div class="progress">
+        <div class="progress-bar" id="progress"></div>
+    </div>
+
+    <div class="question" id="question"></div>
+    <div class="answers" id="answers"></div>
+
+    <button onclick="nextQuestion()">Кийинки</button>
+
+    <div class="result" id="result"></div>
+</div>
+
+<script>
+
+const quiz = [
+{q:"Комуз канча кылдуу?", a:["2","3","4","5"], correct:1},
+{q:"Кыргызстандын улуттук кийими?", a:["Калпак","Чапан","Тон","Баары"], correct:3},
+{q:"Боз үй эмнеден жасалат?", a:["Темир","Жыгач жана кийиз","Пластик","Кирпич"], correct:1},
+{q:"Кыргыздын улуттук тамагы?", a:["Бешбармак","Пицца","Суши","Паста"], correct:0},
+{q:"Калпак эмненин символу?", a:["Байлык","Эркектик","Сулуулук","Тынчтык"], correct:1},
+{q:"Курманжан датка ким болгон?", a:["Баатыр","Акын","Аял башкаруучу","Дарыгер"], correct:2},
+{q:"Кыргыздардын салттуу оюну?", a:["Футбол","Көк бөрү","Баскетбол","Теннис"], correct:1},
+{q:"Комуз кандай аспап?", a:["Үйлөмө","Урма","Кылдуу","Электрондук"], correct:2},
+{q:"Туш кийиз эмне?", a:["Кийим","Декор","Азык","Музыка"], correct:1},
+{q:"Кыргызстандын улуттук бийи?", a:["Кара жорго","Лезгинка","Балет","Хип-хоп"], correct:0},
+{q:"Кийиз эмнеден жасалат?", a:["Жүн","Пахта","Жибек","Темир"], correct:0},
+{q:"Кыргыз элинин негизги кесиби илгери?", a:["Дыйканчылык","Көчмөн мал чарба","Соода","Өндүрүш"], correct:1},
+{q:"Салттуу музыкалык аспап?", a:["Гитара","Пианино","Комуз","Барабан"], correct:2},
+{q:"Кыргызстандын белгилүү акыны?", a:["Алыкул Осмонов","Пушкин","Толстой","Шекспир"], correct:0},
+{q:"Боз үйдүн үстү эмне деп аталат?", a:["Түндүк","Кереге","Уук","Эшик"], correct:0},
+{q:"Кыз узатуу эмне?", a:["Оюн","Салт","Музыка","Тамак"], correct:1},
+{q:"Кыргызстандын улуттук майрамы?", a:["Нооруз","Жаңы жыл","Рождество","Хэллоуин"], correct:0},
+{q:"Калпакты кимдер кийет?", a:["Аялдар","Эркектер","Балдар","Баары"], correct:1},
+{q:"Көчмөндөрдүн турак жайы?", a:["Үй","Боз үй","Квартира","Сарай"], correct:1},
+{q:"Кыргыздын салттуу суусундугу?", a:["Кымыз","Кола","Чай","Сок"], correct:0}
+];
+
+let current = 0;
+let score = 0;
+let timeLeft = 60;
+let selectedAnswer = null;
+
+function loadQuestion(){
+    let q = quiz[current];
+    document.getElementById("question").innerText = (current+1)+". "+q.q;
+
+    let answersHTML = "";
+    q.a.forEach((ans,index)=>{
+        answersHTML += `<div onclick="selectAnswer(this, ${index})">${ans}</div>`;
+    });
+
+    document.getElementById("answers").innerHTML = answersHTML;
+    selectedAnswer = null;
+
+    updateProgress();
+}
+
+function selectAnswer(el,index){
+    document.querySelectorAll(".answers div").forEach(d=>d.classList.remove("selected"));
+    el.classList.add("selected");
+    selectedAnswer = index;
+}
+
+function nextQuestion(){
+    if(selectedAnswer !== null){
+        if(selectedAnswer === quiz[current].correct){
+            score++;
+        }
+    }
+
+    current++;
+
+    if(current < quiz.length){
+        loadQuestion();
+    } else {
+        showResult();
+    }
+}
+
+function showResult(){
+    document.getElementById("question").style.display="none";
+    document.getElementById("answers").style.display="none";
+    document.querySelector("button").style.display="none";
+
+    document.getElementById("result").innerHTML =
+    `🎯 ${score}/20 туура<br><br>Баа: ${getGrade(score)}`;
+}
+
+function getGrade(score){
+    if(score>=18) return "5 ⭐";
+    if(score>=15) return "4 👍";
+    if(score>=10) return "3 🙂";
+    return "2 ❌";
+}
+
+function updateProgress(){
+    let percent = (current/quiz.length)*100;
+    document.getElementById("progress").style.width = percent + "%";
+}
+
+let timer = setInterval(()=>{
+    timeLeft--;
+    document.getElementById("time").innerText = timeLeft;
+
+    if(timeLeft<=0){
+        clearInterval(timer);
+        showResult();
+    }
+},1000);
+
+loadQuestion();
+
+</script>
+
+</body>
+</html>
